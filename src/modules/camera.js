@@ -4,8 +4,7 @@ export function initCamera(videoElement, onFrameCallback) {
     onFrame: async () => {
       await onFrameCallback();
     },
-    width: 640,
-    height: 480
+    facingMode: 'user' // Asegura que use la cámara frontal
   });
   webcam.start();
   return webcam;

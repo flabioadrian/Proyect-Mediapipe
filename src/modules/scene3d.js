@@ -6,12 +6,12 @@ export class Scene3D {
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     // Mantenemos la cámara a 25 para ver las formas bien, 
     // pero el caos se dispersará mucho más allá.
     this.camera.position.z = 25; 
 
-    this.particleCount = 4000; // Aumentamos un poco más para que la dispersión se vea densa
+    this.particleCount = isMobile ? 1500 : 4000;; // ajustamos la cantidad de partículas para móviles
     this.currentShape = 'chaos'; 
     this.targetPositions = new Float32Array(this.particleCount * 3);
     
@@ -107,42 +107,45 @@ export class Scene3D {
 
   animate() {
     requestAnimationFrame(() => this.animate());
-    const positions = this.particles.geometry.attributes.position.array;
-    
-    for (let i = 0; i < this.particleCount; i++) {
-        let tx, ty, tz;
 
-        if (this.currentShape === 'sphere') {
-            const target = this.getSpherePosition(i);
-            // Siguen a la mano
-            tx = target.x + this.particles.position.x;
-            ty = target.y + this.particles.position.y;
-            tz = target.z;
-            this.particles.material.color.setHex(0xffff00);
-        } 
-        else if (this.currentShape === 'heart') {
-            const target = this.getHeartPosition(i);
-            // Siguen a la mano
-            tx = target.x + this.particles.position.x;
-            ty = target.y + this.particles.position.y;
-            tz = target.z;
-            this.particles.material.color.setHex(0xff0000);
-        } 
-        else {
-            // ESTADO CAOS GIGANTE: Vuelven a su dispersión masiva global
-            tx = this.chaosPositions[i * 3];
-            ty = this.chaosPositions[i * 3 + 1];
-            tz = this.chaosPositions[i * 3 + 2];
-            this.particles.material.color.setHex(0xaaaaaa); // Un blanco más tenue para dispersión
+    if (this.currentShape !== 'chaos' || this.particles.position.x !== 0) {
+        const positions = this.particles.geometry.attributes.position.array;
+        
+        for (let i = 0; i < this.particleCount; i++) {
+            let tx, ty, tz;
+
+            if (this.currentShape === 'sphere') {
+                const target = this.getSpherePosition(i);
+                // Siguen a la mano
+                tx = target.x + this.particles.position.x;
+                ty = target.y + this.particles.position.y;
+                tz = target.z;
+                this.particles.material.color.setHex(0xffff00);
+            } 
+            else if (this.currentShape === 'heart') {
+                const target = this.getHeartPosition(i);
+                // Siguen a la mano
+                tx = target.x + this.particles.position.x;
+                ty = target.y + this.particles.position.y;
+                tz = target.z;
+                this.particles.material.color.setHex(0xff0000);
+            } 
+            else {
+                // ESTADO CAOS GIGANTE: Vuelven a su dispersión masiva global
+                tx = this.chaosPositions[i * 3];
+                ty = this.chaosPositions[i * 3 + 1];
+                tz = this.chaosPositions[i * 3 + 2];
+                this.particles.material.color.setHex(0xaaaaaa); // Un blanco más tenue para dispersión
+            }
+
+            // Lerp Suavizado (mantén el 0.05 o bájalo un poco si quieres que 'vuelen' más lento)
+            positions[i * 3] += (tx - positions[i * 3]) * 0.05;
+            positions[i * 3 + 1] += (ty - positions[i * 3 + 1]) * 0.05;
+            positions[i * 3 + 2] += (tz - positions[i * 3 + 2]) * 0.05;
         }
 
-        // Lerp Suavizado (mantén el 0.05 o bájalo un poco si quieres que 'vuelen' más lento)
-        positions[i * 3] += (tx - positions[i * 3]) * 0.05;
-        positions[i * 3 + 1] += (ty - positions[i * 3 + 1]) * 0.05;
-        positions[i * 3 + 2] += (tz - positions[i * 3 + 2]) * 0.05;
+        this.particles.geometry.attributes.position.needsUpdate = true;
     }
-    
-    this.particles.geometry.attributes.position.needsUpdate = true;
     
     // Rotación constante muy lenta del fondo
     this.particles.rotation.y += 0.0005; 

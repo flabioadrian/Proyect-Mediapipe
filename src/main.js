@@ -14,6 +14,8 @@ debugCanvas.height = 480;
 
 const visualizer = new Scene3D(canvasElement);
 
+const multiplier = window.innerWidth < 600 ? 15 : 30;
+
 const hands = initDetection((results) => {
   loader.style.display = 'none';
   
@@ -85,8 +87,8 @@ const hands = initDetection((results) => {
     }
 
     targetPos = {
-      x: (leftHandData[9].x - 0.5) * -30,
-      y: (leftHandData[9].y - 0.5) * -20
+      x: (leftHandData[9].x - 0.5) * -multiplier,
+      y: (leftHandData[9].y - 0.5) * -(multiplier * 0.7)
     };
   }
 
