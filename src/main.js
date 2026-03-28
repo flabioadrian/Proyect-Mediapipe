@@ -13,7 +13,7 @@ debugCanvas.width = 640;
 debugCanvas.height = 480;
 
 const visualizer = new Scene3D(canvasElement);
-
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const multiplier = window.innerWidth < 600 ? 15 : 30;
 
 const hands = initDetection((results) => {
@@ -50,7 +50,7 @@ const hands = initDetection((results) => {
     }
   }
   
-  handLabelsEl.innerText = statusText || "Buscando manos...";
+  handLabelsEl.innerText = statusText || "Buscando manos..." + (isMobile ? " (Móvil)" : " (Desktop)");
   debugCtx.restore();
   //Degub End
 
